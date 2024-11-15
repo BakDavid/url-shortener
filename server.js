@@ -18,7 +18,8 @@ app.post("/shorten", (req, res) => {
     }
 
     const shortId = nanoid(8); // Generate a unique ID
-    const shortUrl = `http://localhost:${PORT}/${shortId}`;
+    const baseUrl = `${req.protocol}://${req.get("host")}`; // Dynamically determine the base URL
+    const shortUrl = `${baseUrl}/${shortId}`;
     urlDatabase[shortId] = originalUrl;
 
     res.json({ shortUrl });
@@ -26,8 +27,9 @@ app.post("/shorten", (req, res) => {
 
 // Endpoint to get all shortened URLs
 app.get("/urls", (req, res) => {
+    const baseUrl = `${req.protocol}://${req.get("host")}`; // Dynamically determine the base URL
     const urls = Object.entries(urlDatabase).map(([id, originalUrl]) => ({
-        shortUrl: `http://localhost:${PORT}/${id}`,
+        shortUrl: `${baseUrl}/${id}`,
         originalUrl: originalUrl,
     }));
     res.json(urls);
@@ -87,20 +89,26 @@ app.get("/", (req, res) => {
     "originalUrl": "https://www.example.com"
 }</pre>
                 <p><strong>Example cURL:</strong></p>
-                <pre>curl -X POST http://localhost:${PORT}/shorten -H "Content-Type: application/json" -d '{"originalUrl": "https://www.example.com"}'</pre>
+                <pre>curl -X POST ${req.protocol}://${req.get(
+        "host"
+    )}/shorten -H "Content-Type: application/json" -d '{"originalUrl": "https://www.example.com"}'</pre>
             </div>
             <div class="endpoint">
                 <h2>2. Get All Shortened URLs</h2>
                 <p><strong>Endpoint:</strong> <code>/urls</code></p>
                 <p><strong>Method:</strong> GET</p>
                 <p><strong>Example cURL:</strong></p>
-                <pre>curl http://localhost:${PORT}/urls</pre>
+                <pre>curl ${req.protocol}://${req.get("host")}/urls</pre>
             </div>
             <div class="endpoint">
                 <h2>3. Redirect to Original URL</h2>
                 <p><strong>Endpoint:</strong> <code>/:id</code></p>
                 <p><strong>Method:</strong> GET</p>
-                <p><strong>Example:</strong> If the shortened URL is <code>http://localhost:${PORT}/abc123</code>, it will redirect to the original URL.</p>
+                <p><strong>Example:</strong> If the shortened URL is <code>${
+                    req.protocol
+                }://${req.get(
+        "host"
+    )}/abc123</code>, it will redirect to the original URL.</p>
             </div>
         </body>
         </html>
